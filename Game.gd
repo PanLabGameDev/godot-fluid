@@ -7,7 +7,7 @@ const pixel_scene = preload("res://Pixel.tscn")
 onready var camera = $Camera2D
 
 # Configuration
-const pixel_size = 30
+const pixel_size = 10
 const resolution = Vector2.ONE * 1000
 
 const LINE_COLOR = Color(0.1, 0.1, 0.1)
@@ -47,11 +47,16 @@ func _start():
 
 	for y in range(grid_resolution.y):
 		for x in range(grid_resolution.x):
-			var p = pixel_scene.instance()
-			p.position = Vector2(x, y)
-			add_child(p)
-			pixels.append(p)
+			pixels.append(null)
 	set_process(true)
+
+func add_pixel(x, y):
+	var p = pixel_scene.instance()
+	p.position = Vector2(x, y)
+	add_child(p)
+	pixels[y*grid_resolution.x + x] = p
+
+	return p
 
 func screen_pos_to_board_pos(screen_pos):
 	return Vector2(int(screen_pos.x / pixel_size), int(screen_pos.y / pixel_size))
@@ -112,6 +117,8 @@ func _draw_pixels():
 			var val = inverse_lerp(32, 0, p)
 			var col = Color(0, 0, val)
 			var pixel_node = pixels[y*grid_resolution.x + x]
+			if pixel_node == null:
+				pixel_node = add_pixel(x, y)
 			if p == 0:
 				pixel_node.hide()
 			else:
