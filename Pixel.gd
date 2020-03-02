@@ -1,9 +1,7 @@
 class_name Pixel
-extends Reference
+extends Node2D
 
-var x
-var y
+onready var fill = $Polygon2D
 
-func _init(x, y):
-	self.x = x
-	self.y = y
+func set_color(col):
+	fill.modulate = col

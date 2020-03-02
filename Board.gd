@@ -17,7 +17,7 @@ func _init(resolution):
 
 func set_pixel(pos, value = 1):
 	if pos.x >= 0 and pos.x < resolution.x and pos.y >= 0 and pos.y < resolution.y:
-		pixels[conv(pos)] = min(256, pixels[conv(pos)] + value)
+		pixels[conv(pos)] = min(32, pixels[conv(pos)] + value)
 
 func get_pixel(pos):
 	if pos.x >= 0 and pos.x < resolution.x and pos.y >= 0 and pos.y < resolution.y:

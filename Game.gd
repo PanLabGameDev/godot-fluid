@@ -1,11 +1,17 @@
 extends Node2D
 
+# Project links
+const pixel_scene = preload("res://Pixel.tscn")
+
+# Scene links
+onready var camera = $Camera2D
+
 # Configuration
-const pixel_size = 10
+const pixel_size = 30
 const resolution = Vector2.ONE * 1000
 
 const LINE_COLOR = Color(0.1, 0.1, 0.1)
-const fill_rate = 10 # per second # TODO should use delta
+const fill_rate = 2 # per second # TODO should use delta
 
 # Members
 var board
@@ -15,9 +21,12 @@ var mousepos = Vector2()
 var left_mousedown = false
 var right_mousedown = false
 var cursor_size = 1
-var paused = true
+var paused = false
+
+var pixels = []
 
 func _ready():
+	set_process(false)
 
 	#OS.vsync_enabled = false
 	#Engine.target_fps = 200
@@ -30,6 +39,20 @@ func _ready():
 
 	OS.window_size = resolution
 
+	call_deferred("_start")
+
+func _start():
+	camera.zoom = Vector2(resolution.x / float(grid_resolution.x), resolution.y / float(grid_resolution.y))
+	camera.zoom = Vector2(float(grid_resolution.x) / resolution.x, float(grid_resolution.y) / resolution.y)
+
+	for y in range(grid_resolution.y):
+		for x in range(grid_resolution.x):
+			var p = pixel_scene.instance()
+			p.position = Vector2(x, y)
+			add_child(p)
+			pixels.append(p)
+	set_process(true)
+
 func screen_pos_to_board_pos(screen_pos):
 	return Vector2(int(screen_pos.x / pixel_size), int(screen_pos.y / pixel_size))
 
@@ -39,7 +62,7 @@ var sim_frame_counter = 0
 var sim_frame_step = 1.0 / fps_sim
 
 func _process(delta):
-	update() # Redraw
+	draw() # Redraw
 
 	if left_mousedown:
 		var board_coo = screen_pos_to_board_pos(mousepos)
@@ -71,11 +94,11 @@ func brush_draw_pixels(pos, clearing=false):
 					else:
 						board.set_pixel(Vector2(screen_x, screen_y), fill_rate)
 
+func draw():
+	_draw_pixels()
 func _draw():
 	#_draw_grid()
-	_draw_pixels()
 	_draw_ui()
-	VisualServer.circle
 
 func _draw_pixels():
 	var filled = true
@@ -85,12 +108,15 @@ func _draw_pixels():
 		for x in board.resolution.x:
 			var pp = Vector2(x, y)
 			var p = board.get_pixel(pp)
+
+			var val = inverse_lerp(32, 0, p)
+			var col = Color(0, 0, val)
+			var pixel_node = pixels[y*grid_resolution.x + x]
 			if p == 0:
-				pass
+				pixel_node.hide()
 			else:
-				var val = inverse_lerp(256, 0, p)
-				var col = Color(0, 0, val)
-				draw_rect(Rect2(x * pixel_size, y * pixel_size, pixel_size, pixel_size), col, filled)
+				pixel_node.show()
+				pixel_node.set_color(col)
 
 
 func _draw_ui():

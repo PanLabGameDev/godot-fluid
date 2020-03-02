@@ -14,7 +14,7 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Board.gd"
 }, {
-"base": "Reference",
+"base": "Node2D",
 "class": "Pixel",
 "language": "GDScript",
 "path": "res://Pixel.gd"
